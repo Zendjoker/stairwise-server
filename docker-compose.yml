@@ -18,11 +18,13 @@ services:
     # Bound to loopback only (127.0.0.1), NOT 0.0.0.0 — this container is not
     # directly reachable from the internet. Whatever already serves this VPS's
     # existing website (nginx, Apache, another reverse proxy) is what should
-    # forward api.gostairwise.com traffic to 127.0.0.1:3001. See DEPLOY.md —
+    # forward api.gostairwise.com traffic to 127.0.0.1:3002. See DEPLOY.md —
     # do not add a caddy/nginx container here that binds 80/443, it will
     # conflict with the site that's already running on this server.
+    # NOTE: host port changed from 3001 -> 3002. Port 3001 on this VPS is
+    # already used by the existing Stairwise Next.js frontend (stairwise-next.service).
     ports:
-      - '127.0.0.1:3001:3000'
+      - '127.0.0.1:3002:3000'
 
 volumes:
   db_data:
