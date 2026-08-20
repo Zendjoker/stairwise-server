@@ -163,12 +163,17 @@ Step 0 is genuinely clear — if in doubt, use Branch A/B/C instead.
 curl -fsSL https://get.docker.com | sh
 ```
 
-**2. Get the code onto the server:**
+**2. Get the code onto the server** — run this directly on the VPS, no
+access to any other machine needed:
 
 ```bash
-# Run this on your COMPUTER, not the VPS:
-scp -r server root@<your-vps-ip>:/root/stairwise-server
+git clone https://github.com/Zendjoker/stairwise-server.git /root/stairwise-server
+cd /root/stairwise-server
 ```
+
+The repo is private, so this will prompt for GitHub credentials — use a
+[personal access token](https://github.com/settings/tokens) as the password
+(GitHub no longer accepts your account password for git operations).
 
 **3. Configure secrets:**
 
@@ -223,7 +228,7 @@ EXPO_PUBLIC_API_URL=https://api.gostairwise.com npx expo start
 
 ```bash
 cd /root/stairwise-server
-# re-copy changed files (scp) or git pull if using git
+git pull
 docker compose up -d --build
 ```
 
