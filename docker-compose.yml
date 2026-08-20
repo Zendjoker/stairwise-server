@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stairwise
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: stairwise
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - db
+    # Bound to loopback only (127.0.0.1), NOT 0.0.0.0 — this container is not
+    # directly reachable from the internet. Whatever already serves this VPS's
+    # existing website (nginx, Apache, another reverse proxy) is what should
+    # forward api.gostairwise.com traffic to 127.0.0.1:3001. See DEPLOY.md —
+    # do not add a caddy/nginx container here that binds 80/443, it will
+    # conflict with the site that's already running on this server.
+    ports:
+      - '127.0.0.1:3001:3000'
+
+volumes:
+  db_data:

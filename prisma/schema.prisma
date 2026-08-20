@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  client
+  tasker
+}
+
+model User {
+  id                  String            @id @default(uuid())
+  phone               String            @unique
+  name                String?
+  role                Role?
+  preferredCategories String[]          @default([])
+  rating              Float             @default(5.0)
+  tasksPosted         Int               @default(0)
+  memberSinceYear     Int               @default(dbgenerated("extract(year from now())::int"))
+  createdAt           DateTime          @default(now())
+
+  postedTasks         Task[]            @relation("PostedTasks")
+  acceptances         TaskAcceptance[]
+  reviewsWritten       Review[]          @relation("ReviewAuthor")
+  reviewsReceived      Review[]          @relation("ReviewTarget")
+}
+
+model Task {
+  id             String           @id @default(uuid())
+  title          String
+  description    String
+  address        String
+  date           DateTime
+  category       String
+  icon           String
+  taskersNeeded  Int
+  hourlyRateCents Int
+  requirements   String[]         @default([])
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now())
+
+  postedById     String
+  postedBy       User             @relation("PostedTasks", fields: [postedById], references: [id])
+
+  acceptances    TaskAcceptance[]
+}
+
+model TaskAcceptance {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([taskId, userId])
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  targetId     String
+  target       User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  authorId     String
+  author       User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  rating       Int
+  text         String
+  createdAt    DateTime @default(now())
+}
