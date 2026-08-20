@@ -15,16 +15,17 @@ services:
     env_file: .env
     depends_on:
       - db
-    # Bound to loopback only (127.0.0.1), NOT 0.0.0.0 — this container is not
-    # directly reachable from the internet. Whatever already serves this VPS's
-    # existing website (nginx, Apache, another reverse proxy) is what should
-    # forward api.gostairwise.com traffic to 127.0.0.1:3002. See DEPLOY.md —
-    # do not add a caddy/nginx container here that binds 80/443, it will
-    # conflict with the site that's already running on this server.
+    # Bound to all interfaces on port 3002, but NOT directly reachable from the
+    # internet: the reverse proxy here is a Docker container (ttg_nginx_prod)
+    # on a separate compose project, which can only reach host services via
+    # the docker bridge gateway IP (172.18.0.1), not via 127.0.0.1. UFW is
+    # configured to only allow port 3002 traffic from the docker bridge
+    # interfaces (docker0, br-49d6222dbfda), blocking direct public access —
+    # same pattern already used for the existing stairwise gunicorn API (8020).
     # NOTE: host port changed from 3001 -> 3002. Port 3001 on this VPS is
     # already used by the existing Stairwise Next.js frontend (stairwise-next.service).
     ports:
-      - '127.0.0.1:3002:3000'
+      - '3002:3000'
 
 volumes:
   db_data:
